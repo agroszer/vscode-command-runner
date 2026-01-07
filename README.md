@@ -74,6 +74,21 @@ or
 }
 ```
 
+## Silent Execution
+You can run commands silently (without any terminal UI effect) by setting `silent: true`:
+```json
+{
+    "key": "ctrl+alt+1",
+    "command": "command-runner.run",
+    "args": {
+        "command": "echo file",
+        "silent": true
+    }
+}
+```
+
+When `silent` is true, the command runs in the background using Node.js child_process without opening or affecting any terminal. This is useful for commands that don't require user interaction or visible output.
+
 ## Predefined Variable
 
 * `${file}`: activated file path;

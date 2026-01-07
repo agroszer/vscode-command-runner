@@ -26,6 +26,7 @@ export interface CommandOptions {
     command?: string;
     terminal?: string | TerminalOptions;
     appendExplorerSelectedFiles?: boolean;
+    silent?: boolean;
 }
 
 
@@ -47,6 +48,12 @@ export function activate(context: vscode.ExtensionContext): void {
                 opts.terminal = { name: opts.terminal };
             }
 
+            // 合并silent选项
+            const terminalOpts: TerminalOptions = {
+                ...opts.terminal,
+                silent: opts.silent,
+            };
+
             // 添加选中的文件
             if (files && files.length) {
                 files.forEach(argv => command.addFile(argv.fsPath));
@@ -59,11 +66,11 @@ export function activate(context: vscode.ExtensionContext): void {
 
             // 执行命令
             if (cmd) {
-                return command.execute(command.commands[cmd] || cmd, opts.terminal);
+                return command.execute(command.commands[cmd] || cmd, terminalOpts);
             }
 
             // 选择命令并执行
-            command.pick();
+            command.pick(terminalOpts);
         })
     );
 

@@ -13,6 +13,7 @@
  *****************************************
  */
 import * as vscode from 'vscode';
+import * as cp from 'child_process';
 import replace from './helpers/replace';
 import Accessor, { VariableScope } from './Accessor';
 
@@ -25,6 +26,7 @@ export type TerminalOptions = Partial<vscode.TerminalOptions> & {
     autoFocus?: boolean;
     autoClear?: boolean;
     sorted?: string[];
+    silent?: boolean;
 };
 
 
@@ -161,11 +163,33 @@ export default class Command {
 
     /* 执行命令 */
     public async execute(cmd: string, options?: TerminalOptions) {
-        const { autoClear, autoFocus, ...terminalOptions }: TerminalOptions = {
+        const { autoClear, autoFocus, silent, ...terminalOptions }: TerminalOptions = {
             ...this.$accessor.config('command-runner.terminal'),
             ...options,
             hideFromUser: false,
         };
+
+        // 预设数据
+        const predefined = {
+            selectedFile: this.$files[0] || '',
+            selectedFiles: this.$files.join(' '),
+        };
+
+        // 获取命令
+        const commandStr = this.$accessor.config('command-runner.autoAppendSelectedFiles')
+            ? cmd + ' ' + this.$files.join(' ')
+            : cmd;
+
+        // 解析命令
+        const resolvedCommand = await this.resolve(commandStr, predefined);
+
+        // 输出命令信息
+        console.log('---> Run Command:', resolvedCommand);
+
+        // 静默执行命令（不使用终端）
+        if (silent) {
+            return this.executeSilent(resolvedCommand, terminalOptions.cwd);
+        }
 
         // 创建终端
         const terminal = createTerminal(terminalOptions);
@@ -180,22 +204,36 @@ export default class Command {
             await vscode.commands.executeCommand('workbench.action.terminal.clear');
         }
 
-        // 预设数据
-        const predefined = {
-            selectedFile: this.$files[0] || '',
-            selectedFiles: this.$files.join(' '),
-        };
-
-        // 获取命令
-        const command = this.$accessor.config('command-runner.autoAppendSelectedFiles')
-            ? cmd + ' ' + this.$files.join(' ')
-            : cmd;
-
         // 写入命令
-        terminal.sendText(await this.resolve(command, predefined));
+        terminal.sendText(resolvedCommand);
+    }
 
-        // 输出命令信息
-        console.log('--> Run Command:', command);
+    /* 静默执行命令 */
+    private executeSilent(command: string, cwd?: string | vscode.Uri): Promise<void> {
+        return new Promise((resolve, reject) => {
+            const workspaceFolder = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+            const execCwd = (typeof cwd === 'string' ? cwd : cwd?.fsPath) || workspaceFolder || process.cwd();
+
+            cp.exec(command, { cwd: execCwd }, (error, stdout, stderr) => {
+                if (error) {
+                    console.error('Command failed:', error.message);
+                    if (stderr) {
+                        console.error('stderr:', stderr);
+                    }
+                    reject(error);
+                    return;
+                }
+
+                if (stdout) {
+                    console.log('stdout:', stdout);
+                }
+                if (stderr) {
+                    console.warn('stderr:', stderr);
+                }
+
+                resolve();
+            });
+        });
     }
 
     /* 执行选择的文字 */
