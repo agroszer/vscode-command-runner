@@ -227,6 +227,23 @@ export default () => cache({
         return '';
     },
 
+    /* 当前光标所在单词 */
+    wordUnderCursor(): string {
+        const [sl] = this.selections() || [];
+        const document = this.document();
+
+        // 存在选区和文档
+        if (sl && document) {
+            const wordRange = document.getWordRangeAtPosition(sl.active);
+            if (wordRange) {
+                return document.getText(wordRange);
+            }
+        }
+
+        // 返回空
+        return '';
+    },
+
     /* 当前选择文字列表 */
     selectedTextList(): string {
         const document = this.document();
@@ -290,10 +307,10 @@ export default () => cache({
         const document = this.document();
         const workspaceFolder = (
             document ?
-            workspace.getWorkspaceFolder(document.uri) :
-            workspace.workspaceFolders ?
-            workspace.workspaceFolders[0] :
-            undefined
+                workspace.getWorkspaceFolder(document.uri) :
+                workspace.workspaceFolders ?
+                    workspace.workspaceFolders[0] :
+                    undefined
         );
 
         // 返回结果

@@ -32,6 +32,7 @@ export const variableMap = {
     columnNumber: 1,
     columnNumbers: 1,
     selectedText: 1,
+    wordUnderCursor: 1,
     selectedTextList: 1,
     selectedTextSection: 1,
     selectedPosition: 1,
