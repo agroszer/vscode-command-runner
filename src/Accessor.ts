@@ -33,6 +33,7 @@ export const variableMap = {
     columnNumbers: 1,
     selectedText: 1,
     wordUnderCursor: 1,
+    clipboardText: 1,
     selectedTextList: 1,
     selectedTextSection: 1,
     selectedPosition: 1,
@@ -84,7 +85,7 @@ export default class Accessor {
     }
 
     /* 获取变量 */
-    variable(scope: VariableScope): string {
+    variable(scope: VariableScope): string | Thenable<string> {
         return variableMap[scope] === 1 ? this.$variable[scope]() : '';
     }
 

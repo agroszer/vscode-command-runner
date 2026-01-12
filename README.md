@@ -110,6 +110,7 @@ When `silent` is true, the command runs in the background using Node.js child_pr
 * `${selectedLocation}`: the first selected location, eg. `21,6,21,10`;
 * `${selectedLocationList}`: the all selected location list, eg. `21,6,21,10 22,6,22,10 23,6,23,10`;
 * `${wordUnderCursor}`: the word under the cursor;
+* `${clipboardText}`: the current clipboard text content;
 * `${relativeFile}`: activated file relative path;
 * `${workspaceFolder}`: activated workspace folder path;
 * `${workspaceFolderBasename}`: activated workspace folder basename;

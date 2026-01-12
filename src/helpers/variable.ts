@@ -244,6 +244,11 @@ export default () => cache({
         return '';
     },
 
+    /* 剪贴板文本内容 */
+    clipboardText(): Thenable<string> {
+        return vscode.env.clipboard.readText();
+    },
+
     /* 当前选择文字列表 */
     selectedTextList(): string {
         const document = this.document();

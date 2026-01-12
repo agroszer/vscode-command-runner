@@ -108,7 +108,7 @@ export default class Command {
                 case 'command':
                     return args && await vscode.commands.executeCommand(args) || '';
                 default:
-                    return this.$accessor.variable(variable as VariableScope);
+                    return await this.$accessor.variable(variable as VariableScope);
             }
         });
     }
@@ -238,6 +238,6 @@ export default class Command {
 
     /* 执行选择的文字 */
     public async executeSelectText(options?: TerminalOptions) {
-        await this.execute(this.$accessor.variable('selectedTextSection'), options);
+        await this.execute(await this.$accessor.variable('selectedTextSection'), options);
     }
 }
